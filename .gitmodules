@@ -1,0 +1,8 @@
+[submodule "agent"]
+	path = agent
+	url = git@github.com:fm-labs/kstack-agent.git
+	branch = main
+[submodule "ui"]
+	path = ui
+	url = git@github.com:fm-labs/kstack-ui.git
+	branch = main
