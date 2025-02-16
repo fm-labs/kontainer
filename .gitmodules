@@ -5,4 +5,3 @@
 [submodule "ui"]
 	path = ui
 	url = git@github.com:fm-labs/kstack-ui.git
-	branch = main
