@@ -8,7 +8,9 @@ COPY ./ui/package.json ./ui/yarn.lock ./
 
 # Install packages and cache them
 #RUN npm i -g npm@latest && npm i -g yarn@latest
-RUN yarn install --frozen-lockfile && yarn cache clean
+#RUN yarn install --frozen-lockfile && yarn cache clean
+RUN which yarn
+RUN yarn install && yarn cache clean
 
 # Copy rest of files
 # See / edit .dockerignore file for excluded files
