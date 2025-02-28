@@ -29,10 +29,10 @@ The KMC will be available at `http://localhost:13080`.
 
 ```bash
 # Use curl to download this script and run it with bash
-curl -s https://raw.githubusercontent.com/fm-labs/kstack-mc/refs/heads/main//run.sh | bash
+curl -fsSL https://raw.githubusercontent.com/fm-labs/kstack-mc/refs/heads/main/run.sh | bash
 ```
 
 ```bash
 # Use wget to download this script and run it with bash
-wget -qO- https://raw.githubusercontent.com/fm-labs/kstack-mc/refs/heads/main//run.sh | bash
+wget -qO- https://raw.githubusercontent.com/fm-labs/kstack-mc/refs/heads/main/run.sh | bash
 ```
