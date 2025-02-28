@@ -14,7 +14,8 @@ docker run -d \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /var/lib/docker/volumes:/var/lib/docker/volumes:ro \
   -v kmc_data:/app/data \
-  -p 13080:80 \
+  -p 3080:80 \
+  -p 3443:443 \
   fmlabs/kmc:latest
 ```
 
