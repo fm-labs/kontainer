@@ -1,6 +1,6 @@
 [project]
 name = "kstack-mc"
-version = "0.7.1"
+version = "0.7.3"
 description = ""
 authors = [
     {name = "fm-labs",email = "flowmotionlabs@gmail.com"}
