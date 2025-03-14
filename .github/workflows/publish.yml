@@ -53,17 +53,18 @@ jobs:
           
           #docker build -t $REGISTRY/$REPO_NAME:$IMAGE_TAG --progress=plain -f ./Dockerfile-alpine .
           #docker push $REGISTRY/$REPO_NAME:$IMAGE_TAG
+          #docker tag $REGISTRY/$REPO_NAME:$IMAGE_TAG $REGISTRY/$REPO_NAME:latest
+          #docker push $REGISTRY/$REPO_NAME:latest
           
-          docker buildx build -t $REGISTRY/$REPO_NAME:$IMAGE_TAG \
+          docker buildx build \
+            -t $REGISTRY/$REPO_NAME:$IMAGE_TAG \
+            -t $REGISTRY/$REPO_NAME:latest \
             --progress=plain \
             --platform linux/amd64,linux/arm64 \
             -f ./Dockerfile-alpine \
             --push \
             .
           
-          docker tag $REGISTRY/$REPO_NAME:$IMAGE_TAG $REGISTRY/$REPO_NAME:latest
-          docker push $REGISTRY/$REPO_NAME:latest
-  
           echo "image=$REGISTRY/$REPO_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
 
