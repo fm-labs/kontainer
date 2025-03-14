@@ -49,11 +49,10 @@ jobs:
           REPO_NAME: ${{ vars.DOCKERHUB_REPONAME }}
           REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-
+          set -xe
+          
           #docker build -t $REGISTRY/$REPO_NAME:$IMAGE_TAG --progress=plain -f ./Dockerfile-alpine .
           #docker push $REGISTRY/$REPO_NAME:$IMAGE_TAG
-          #docker tag $REGISTRY/$REPO_NAME:$IMAGE_TAG $REGISTRY/$REPO_NAME:latest
-          #docker push $REGISTRY/$REPO_NAME:latest
           
           docker buildx build -t $REGISTRY/$REPO_NAME:$IMAGE_TAG \
             --progress=plain \
@@ -61,6 +60,9 @@ jobs:
             -f ./Dockerfile-alpine \
             --push \
             .
+          
+          docker tag $REGISTRY/$REPO_NAME:$IMAGE_TAG $REGISTRY/$REPO_NAME:latest
+          docker push $REGISTRY/$REPO_NAME:latest
   
           echo "image=$REGISTRY/$REPO_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
