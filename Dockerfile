@@ -55,6 +55,7 @@ RUN apt-get update \
       redis-server \
       supervisor \
       docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
+    && apt-get upgrade -yy \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/cache/apt/archives/*

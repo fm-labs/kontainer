@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker build -t kmc:dev -f ./Dockerfile --progress=plain . && \
+docker build -t kmc:dev -f ./Dockerfile-alpine --progress=plain . && \
 
 docker run -it --rm \
   --name kmc-dev \
