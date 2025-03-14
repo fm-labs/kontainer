@@ -50,11 +50,13 @@ jobs:
           REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
 
-          docker build -t $REGISTRY/$REPO_NAME:$IMAGE_TAG --progress=plain .
-          #docker buildx build -t $REGISTRY/$REPO_NAME:$IMAGE_TAG \
-          #  --progress=plain \
-          #  --platform linux/amd64,linux/arm64 \
-          #  .
+          #docker build -t $REGISTRY/$REPO_NAME:$IMAGE_TAG --progress=plain -f ./Dockerfile-alpine .
+          
+          docker buildx build -t $REGISTRY/$REPO_NAME:$IMAGE_TAG \
+            --progress=plain \
+            --platform linux/amd64,linux/arm64 \
+            -f ./Dockerfile-alpine \
+            .
   
           docker push $REGISTRY/$REPO_NAME:$IMAGE_TAG
   
