@@ -17,23 +17,71 @@ RUN ls -la /app
 RUN yarn build
 
 
+## Assembly stage
+FROM scratch AS assembly-stage
+
+WORKDIR /
+
+# Copy the application code
+COPY ./agent/pyproject.toml ./agent/poetry.lock /app/
+COPY ./agent/bin /app/bin
+COPY ./agent/src /app/src
+COPY ./agent/agent.py /app/agent.py
+COPY ./agent/celery_worker.sh /app/celery_worker.sh
+
+# Copy frontend app from the ui-builder stage
+COPY --from=ui-builder /app/dist /app/www
+
+# Configure Nginx
+COPY ./agent/docker/alpine/nginx/nginx.conf /etc/nginx/nginx.conf
+#COPY ./agent/docker/nginx/site.default.conf /etc/nginx/http.d/default.conf
+COPY ./docker/nginx/site.ssl.conf /etc/nginx/http.d/default.conf
+
+# Configure Supervisor
+COPY ./agent/docker/alpine/supervisor/supervisord.conf /etc/supervisord.conf
+COPY ./agent/docker/supervisor/celery_worker.ini /etc/supervisor.d/celery_worker.ini
+COPY ./agent/docker/supervisor/redis.ini /etc/supervisor.d/redis.ini
+COPY ./agent/docker/supervisor/nginx.ini /etc/supervisor.d/nginx.ini
+COPY ./agent/docker/supervisor/app.ini /etc/supervisor.d/app.ini
+
+
+
 ## Production stage
 FROM python:3.13-alpine
-MAINTAINER "fm-labs <flowmotionlabs@gmail.com>"
+LABEL maintainer="fm-labs <flowmotionlabs@gmail.com>"
 LABEL description="This is the production image for the kmc service"
-
 
 ENV AGENT_HOST=0.0.0.0
 ENV AGENT_PORT=5000
 
+ARG DOCKER_DIR=/var/lib/docker
+ARG DOCKER_COMPOSE_VERSION=2.34.0
+
+# Install os packages
 RUN apk update && apk add --no-cache \
+    bash \
     curl \
     nginx \
     redis \
     supervisor \
     openssl \
-    bash \
-    docker-cli
+    docker-cli \
+    git \
+    openssh
+
+
+# Install poetry and other python dependencies
+RUN pip install --no-cache-dir --upgrade pip poetry setuptools wheel
+
+
+# Install docker-compose
+RUN mkdir -p $DOCKER_DIR/cli-plugins && \
+    ARCH=$(uname -m) && \
+    COMPOSE_DOWNLOAD_URL=https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${ARCH} && \
+    echo "COMPOSE_DOWNLOAD_URL=$COMPOSE_DOWNLOAD_URL" && \
+    curl -SL --fail ${COMPOSE_DOWNLOAD_URL} -o $DOCKER_DIR/cli-plugins/docker-compose && \
+    chmod +x $DOCKER_DIR/cli-plugins/docker-compose && \
+    ln -s $DOCKER_DIR/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 
 # Set a non-root user
@@ -44,8 +92,6 @@ RUN addgroup -S appgroup && addgroup -S docker && \
 
 WORKDIR /app
 
-# Copy frontend app from the ui-builder stage
-COPY --from=ui-builder /app/dist /app/www
 
 # Install python dependencies
 COPY ./agent/pyproject.toml ./agent/poetry.lock /app/
@@ -53,48 +99,59 @@ RUN pip install poetry \
     && poetry config virtualenvs.create false \
     && poetry install --only main --no-root
 
-# Copy the rest of the code
-COPY ./agent/bin /app/bin
-COPY ./agent/src /app/src
-COPY ./agent/agent.py /app/agent.py
-COPY ./agent/celery_worker.sh /app/celery_worker.sh
+# Copy frontend app from the ui-builder stage
+COPY --from=assembly-stage /app /app
+COPY --from=assembly-stage /etc/nginx /etc/nginx
+COPY --from=assembly-stage /etc/supervisord.conf /etc/supervisord.conf
+COPY --from=assembly-stage /etc/supervisor.d /etc/supervisor.d
 
 
-# Configure Nginx
-COPY ./agent/docker/alpine/nginx/nginx.conf /etc/nginx/nginx.conf
-#COPY ./agent/docker/nginx/site.default.conf /etc/nginx/http.d/default.conf
-COPY docker/nginx/site.ssl.conf /etc/nginx/http.d/default.conf
-
-# Configure Supervisor
-COPY ./agent/docker/alpine/supervisor/supervisord.conf /etc/supervisord.conf
-COPY ./agent/docker/supervisor/celery_worker.ini /etc/supervisor.d/celery_worker.ini
-COPY ./agent/docker/supervisor/redis.ini /etc/supervisor.d/redis.ini
-COPY ./agent/docker/supervisor/nginx.ini /etc/supervisor.d/nginx.ini
-COPY ./agent/docker/supervisor/app.ini /etc/supervisor.d/app.ini
+## Copy frontend app from the ui-builder stage
+#COPY --from=ui-builder /app/dist /app/www
+#
+## Copy the rest of the code
+#COPY ./agent/bin /app/bin
+#COPY ./agent/src /app/src
+#COPY ./agent/agent.py /app/agent.py
+#COPY ./agent/celery_worker.sh /app/celery_worker.sh
+#
+## Configure Nginx
+#COPY ./agent/docker/alpine/nginx/nginx.conf /etc/nginx/nginx.conf
+##COPY ./agent/docker/nginx/site.default.conf /etc/nginx/http.d/default.conf
+#COPY docker/nginx/site.ssl.conf /etc/nginx/http.d/default.conf
+#
+## Configure Supervisor
+#COPY ./agent/docker/alpine/supervisor/supervisord.conf /etc/supervisord.conf
+#COPY ./agent/docker/supervisor/celery_worker.ini /etc/supervisor.d/celery_worker.ini
+#COPY ./agent/docker/supervisor/redis.ini /etc/supervisor.d/redis.ini
+#COPY ./agent/docker/supervisor/nginx.ini /etc/supervisor.d/nginx.ini
+#COPY ./agent/docker/supervisor/app.ini /etc/supervisor.d/app.ini
 
 
 # Change ownership to non-root user
-RUN chown -R appuser:appgroup /run
-RUN chown -R appuser:appgroup /var/run
-
-RUN touch /var/log/supervisord.log && \
-    touch /run/supervisord.pid && \
-    touch /run/supervisord.sock && \
+RUN mkdir -p /app/ssl/ && \
+    mkdir -p /var/lib/redis && \
     mkdir -p /var/log/supervisor && \
-    chown -R appuser:appgroup /etc/supervisord.conf /etc/supervisor.d /run/supervisord.pid /run/supervisord.sock && \
-    chown -R appuser:appgroup /var/log/supervisord.log /var/log/supervisor
-
-RUN mkdir -p /etc/nginx/ssl/ &&  \
+    mkdir -p /var/log/nginx/ && \
+    mkdir -p /var/log/redis && \
+    touch /var/log/redis/redis.log && touch /run/redis/redis.pid && \
     touch /var/lib/nginx/logs/error.log && \
     touch /var/lib/nginx/logs/access.log && \
-    chown -R appuser:appgroup /etc/nginx/ssl/ && \
-    chown -R appuser:appgroup /var/lib/nginx /var/lib/nginx/logs /run/nginx && \
     chown -R appuser:appgroup /var/lib/nginx/logs/error.log && \
     chown -R appuser:appgroup /var/lib/nginx/logs/access.log
 
-RUN mkdir -p /var/lib/redis && touch /var/log/redis/redis.log && touch /run/redis/redis.pid && \
+
+# Change ownership to non-root user
+RUN chown -R appuser:appgroup /run && \
+    chown -R appuser:appgroup /var/run && \
+    chown -R appuser:appgroup /etc/supervisord.conf /etc/supervisor.d && \
+    chown -R appuser:appgroup /var/log/supervisor && \
+    chown -R appuser:appgroup /app/ssl/ && \
+    chown -R appuser:appgroup /var/lib/nginx /var/lib/nginx/logs /run/nginx && \
     chown -R appuser:appgroup /var/lib/redis && \
-    chown -R appuser:appgroup /var/log/redis/redis.log /run/redis/redis.pid
+    chown -R appuser:appgroup /var/log/redis/redis.log /run/redis/redis.pid && \
+    chown -R appuser:appgroup /var/lib/docker/cli-plugins && \
+    chown -R appuser:appgroup /usr/local/bin/docker-compose
 
 
 #ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
