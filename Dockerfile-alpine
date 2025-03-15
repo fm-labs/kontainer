@@ -85,9 +85,13 @@ RUN mkdir -p $DOCKER_DIR/cli-plugins && \
 
 
 # Set a non-root user
+# We add user to the 'ping' (gid: 999) group, which is a default group in the alpine image,
+# and the equivalent of the 'docker' group in the ubuntu image,
+# which is automatically created by the linux docker installer.
 RUN addgroup -S appgroup && addgroup -S docker && \
     adduser -S appuser -G appgroup && \
     adduser appuser docker && \
+    adduser appuser ping && \
     adduser appuser root
 
 WORKDIR /app
