@@ -21,7 +21,6 @@ $DOCKER pull ${KMC_IMAGE} && \
 exec $DOCKER run -d \
   --name ${KMC_CONTAINER_NAME} \
   --restart always \
-  --privileged \
   -v ${DOCKER_SOCKET}:/var/run/docker.sock:ro \
   -v ${DOCKER_HOME}/volumes:/var/lib/docker/volumes:ro \
   -v kstack_agent_data:/app/data \
