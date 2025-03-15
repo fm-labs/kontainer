@@ -32,4 +32,5 @@ docker run -it --rm \
   -v /var/lib/docker/volumes:/var/lib/docker/volumes:ro \
   -v kmc_dev_data:/app/data \
   -v $PWD/.dev/ssl:/app/ssl \
+  -e AGENT_DATA_VOLUME=kmc_dev_data \
   kmc:dev $@

@@ -20,6 +20,6 @@ exec $DOCKER run -d \
   --restart always \
   -v ${DOCKER_SOCKET}:/var/run/docker.sock:ro \
   -v ${DOCKER_HOME}/volumes:/var/lib/docker/volumes:ro \
-  -v kmc_data:/app/data \
+  -v kstack_agent_data:/app/data \
   -p ${KMC_PORT}:3443 \
   fmlabs/kmc:latest
