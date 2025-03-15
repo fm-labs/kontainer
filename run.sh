@@ -18,7 +18,7 @@ echo "KMC_PORT=${KMC_PORT}"
 
 $DOCKER stop ${KMC_CONTAINER_NAME} && $DOCKER rm ${KMC_CONTAINER_NAME}
 $DOCKER pull ${KMC_IMAGE} && \
-exec $DOCKER run \
+exec $DOCKER run -d \
   --name ${KMC_CONTAINER_NAME} \
   --restart always \
   -v ${DOCKER_SOCKET}:/var/run/docker.sock:ro \
