@@ -81,7 +81,7 @@ COPY ./agent/celery_worker.sh /app/celery_worker.sh
 COPY ./agent/docker/nginx/conf.d/ /etc/nginx/conf.d/
 COPY ./agent/docker/nginx/nginx.conf /etc/nginx/nginx.conf
 #COPY ./agent/docker/nginx/site.default.conf /etc/nginx/sites-available/default
-COPY ./docker/nginx/site.default-ssl.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx/site.ssl.conf /etc/nginx/conf.d/default.conf
 
 # Configure Supervisor
 COPY ./agent/docker/supervisor/celery_worker.conf /etc/supervisor/conf.d/celery_worker.conf
