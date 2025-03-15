@@ -17,30 +17,45 @@ RUN ls -la /app
 RUN yarn build
 
 
-## Production stage
-FROM python:3.13-alpine
-MAINTAINER "fm-labs <flowmotionlabs@gmail.com>"
-LABEL description="This is the production image for the kmc service"
 
+#FROM python:3.13-alpine
+FROM alpine@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
 
 ENV AGENT_HOST=0.0.0.0
 ENV AGENT_PORT=5000
 
+# Set environment variables for Python
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONFAULTHANDLER=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PATH="/app/bin:$PATH"
+
+# Install necessary system dependencies & Python
 RUN apk update && apk add --no-cache \
+    python3 \
+    py3-pip \
+    py3-setuptools \
+    py3-wheel \
+    py3-virtualenv \
     curl \
     nginx \
     redis \
     supervisor \
     openssl \
     bash \
-    docker-cli
+    docker-cli \
+    && rm -rf /var/cache/apk/*
 
+#RUN python3 -m ensurepip
+RUN pip install --no-cache-dir --break-system-packages poetry
 
 # Set a non-root user
 RUN addgroup -S appgroup && addgroup -S docker && \
     adduser -S appuser -G appgroup && \
     adduser appuser docker && \
     adduser appuser root
+
 
 WORKDIR /app
 
@@ -49,9 +64,14 @@ COPY --from=ui-builder /app/dist /app/www
 
 # Install python dependencies
 COPY ./agent/pyproject.toml ./agent/poetry.lock /app/
-RUN pip install poetry \
-    && poetry config virtualenvs.create false \
-    && poetry install --only main --no-root
+
+
+#RUN pip install poetry \
+#    && poetry config virtualenvs.create false \
+#    && poetry install --only main --no-root
+
+RUN poetry install --only main --no-root
+RUN poetry env info
 
 # Copy the rest of the code
 COPY ./agent/bin /app/bin
