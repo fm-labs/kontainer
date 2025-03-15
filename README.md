@@ -16,11 +16,10 @@ docker pull fmlabs/kmc:latest
 docker run -d \
   --name kmc \
   --restart always \
-  --privileged \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /var/lib/docker/volumes:/var/lib/docker/volumes:ro \
   -v kmc_data:/app/data \
-  -p 3443:443 \
+  -p 3443:3443 \
   fmlabs/kmc:latest
 ```
 
@@ -43,11 +42,10 @@ $DOCKER pull fmlabs/kmc:latest && \
 exec $DOCKER run -d \
   --name ${KMC_CONTAINER_NAME} \
   --restart always \
-  --privileged \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /var/lib/docker/volumes:/var/lib/docker/volumes:ro \
   -v kmc_data:/app/data \
-  -p ${KMC_PORT}:443 \
+  -p ${KMC_PORT}:3443 \
   fmlabs/kmc:latest
 
 ```
