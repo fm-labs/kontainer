@@ -27,4 +27,5 @@ exec $DOCKER run -d \
   -v ${DOCKER_HOME}/volumes:/var/lib/docker/volumes:ro \
   -v kstack_agent_data:/app/data \
   -e AGENT_DATA_VOLUME=kstack_agent_data \
+  -e DOCKER_HOME=${DOCKER_HOME} \
   ${KMC_IMAGE}
