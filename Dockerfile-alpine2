@@ -21,8 +21,8 @@ RUN yarn build
 #FROM python:3.13-alpine
 FROM alpine@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
 
-ENV AGENT_HOST=0.0.0.0
-ENV AGENT_PORT=5000
+ENV KONTAINER_HOST=0.0.0.0
+ENV KONTAINER_PORT=5000
 
 # Set environment variables for Python
 ENV PYTHONUNBUFFERED=1 \
@@ -63,7 +63,7 @@ WORKDIR /app
 COPY --from=ui-builder /app/dist /app/www
 
 # Install python dependencies
-COPY ./agent/pyproject.toml ./agent/poetry.lock /app/
+COPY ./core/pyproject.toml ./core/poetry.lock /app/
 
 
 #RUN pip install poetry \
@@ -74,23 +74,23 @@ RUN poetry install --only main --no-root
 RUN poetry env info
 
 # Copy the rest of the code
-COPY ./agent/bin /app/bin
-COPY ./agent/src /app/src
-COPY ./agent/agent.py /app/agent.py
-COPY ./agent/celery_worker.sh /app/celery_worker.sh
+COPY ./core/bin /app/bin
+COPY ./core/src /app/src
+COPY ./core/main.py /app/main.py
+COPY ./core/celery_worker.sh /app/celery_worker.sh
 
 
 # Configure Nginx
-COPY ./agent/docker/alpine/nginx/nginx.conf /etc/nginx/nginx.conf
-#COPY ./agent/docker/nginx/site.default.conf /etc/nginx/http.d/default.conf
+COPY ./core/docker/alpine/nginx/nginx.conf /etc/nginx/nginx.conf
+#COPY ./core/docker/nginx/site.default.conf /etc/nginx/http.d/default.conf
 COPY docker/nginx/site.ssl.conf /etc/nginx/http.d/default.conf
 
 # Configure Supervisor
-COPY ./agent/docker/alpine/supervisor/supervisord.conf /etc/supervisord.conf
-COPY ./agent/docker/supervisor/celery_worker.ini /etc/supervisor.d/celery_worker.ini
-COPY ./agent/docker/supervisor/redis.ini /etc/supervisor.d/redis.ini
-COPY ./agent/docker/supervisor/nginx.ini /etc/supervisor.d/nginx.ini
-COPY ./agent/docker/supervisor/app.ini /etc/supervisor.d/app.ini
+COPY ./core/docker/alpine/supervisor/supervisord.conf /etc/supervisord.conf
+COPY ./core/docker/supervisor/celery_worker.ini /etc/supervisor.d/celery_worker.ini
+COPY ./core/docker/supervisor/redis.ini /etc/supervisor.d/redis.ini
+COPY ./core/docker/supervisor/nginx.ini /etc/supervisor.d/nginx.ini
+COPY ./core/docker/supervisor/app.ini /etc/supervisor.d/app.ini
 
 
 # Change ownership to non-root user
@@ -118,17 +118,17 @@ RUN mkdir -p /var/lib/redis && touch /var/log/redis/redis.log && touch /run/redi
 
 
 #ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
-COPY ./agent/docker/entrypoint-alpine.sh /entrypoint.sh
+COPY ./core/docker/entrypoint-alpine.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["supervisor"]
 
 # Health check
 HEALTHCHECK --interval=60s --timeout=3s --retries=3 \
- CMD curl --fail http://localhost:${AGENT_PORT}/ || exit 1
+ CMD curl --fail http://localhost:${KONTAINER_PORT}/ || exit 1
 
 
-#EXPOSE ${AGENT_PORT}
+#EXPOSE ${KONTAINER_PORT}
 #EXPOSE 3080
 EXPOSE 3443
 

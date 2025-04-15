@@ -67,24 +67,24 @@ RUN apt-get update \
 WORKDIR /app
 
 # Install dependencies
-COPY ./agent/pyproject.toml ./agent/poetry.lock /app/
+COPY ./core/pyproject.toml ./core/poetry.lock /app/
 RUN pip install poetry \
     && poetry config virtualenvs.create false \
     && poetry install --only main --no-root
 
 # Copy the rest of the code
-COPY ./agent/src /app/src
-COPY ./agent/agent.py /app/agent.py
-COPY ./agent/celery_worker.sh /app/celery_worker.sh
+COPY ./core/src /app/src
+COPY ./core/main.py /app/main.py
+COPY ./core/celery_worker.sh /app/celery_worker.sh
 
 # Copy nginx configuration
-COPY ./agent/docker/nginx/conf.d/ /etc/nginx/conf.d/
-COPY ./agent/docker/nginx/nginx.conf /etc/nginx/nginx.conf
-#COPY ./agent/docker/nginx/site.default.conf /etc/nginx/sites-available/default
+COPY ./core/docker/nginx/conf.d/ /etc/nginx/conf.d/
+COPY ./core/docker/nginx/nginx.conf /etc/nginx/nginx.conf
+#COPY ./core/docker/nginx/site.default.conf /etc/nginx/sites-available/default
 COPY docker/nginx/site.ssl.conf /etc/nginx/conf.d/default.conf
 
 # Configure Supervisor
-COPY ./agent/docker/supervisor/celery_worker.conf /etc/supervisor/conf.d/celery_worker.conf
+COPY ./core/docker/supervisor/celery_worker.conf /etc/supervisor/conf.d/celery_worker.conf
 
 
 # Copy frontend app from the ui-builder stage
@@ -93,7 +93,7 @@ COPY --from=ui-builder /app/dist /app/www
 
 # Entry point
 #COPY ./docker/entrypoint.sh /entrypoint.sh
-COPY ./agent/docker/entrypoint.sh /entrypoint.sh
+COPY ./core/docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn-tcp"]

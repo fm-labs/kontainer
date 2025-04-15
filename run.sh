@@ -25,7 +25,7 @@ exec $DOCKER run -d \
   -p ${KMC_PORT}:3443 \
   -v ${DOCKER_SOCKET}:/var/run/docker.sock:ro \
   -v ${DOCKER_HOME}/volumes:/var/lib/docker/volumes:ro \
-  -v kstack_agent_data:/app/data \
-  -e AGENT_DATA_VOLUME=kstack_agent_data \
+  -v kontainer_data:/app/data \
+  -e AGENT_DATA_VOLUME=kontainer_data \
   -e DOCKER_HOME=${DOCKER_HOME} \
   ${KMC_IMAGE}
