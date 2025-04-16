@@ -1,31 +1,31 @@
 #!/bin/bash
-# KMC quick-run script
-# This script is used to quickly run the KMC container
+# KONTAINER quick-run script
+# This script is used to quickly run the KONTAINER container
 set -xe
 DOCKER=$(which docker)
 DOCKER_HOME=${DOCKER_HOME:-/var/lib/docker}
 DOCKER_SOCKET=${DOCKER_SOCKET:-/var/run/docker.sock}
-KMC_IMAGE=${KMC_IMAGE:-fmlabs/kmc:latest}
-KMC_CONTAINER_NAME=${KMC_CONTAINER_NAME:-kmc}
-KMC_PORT=${KMC_PORT:-3443}
+KONTAINER_IMAGE=${KONTAINER_IMAGE:-fmlabs/kontainer:latest}
+KONTAINER_CONTAINER_NAME=${KONTAINER_CONTAINER_NAME:-kontainer}
+KONTAINER_PORT=${KONTAINER_PORT:-3443}
 
-echo "KMC quick-run script"
+echo "KONTAINER quick-run script"
 echo "DOCKER=${DOCKER}"
 echo "DOCKER_HOME=${DOCKER_HOME}"
 echo "DOCKER_SOCKET=${DOCKER_SOCKET}"
-echo "KMC_IMAGE=${KMC_IMAGE}"
-echo "KMC_CONTAINER_NAME=${KMC_CONTAINER_NAME}"
-echo "KMC_PORT=${KMC_PORT}"
+echo "KONTAINER_IMAGE=${KONTAINER_IMAGE}"
+echo "KONTAINER_CONTAINER_NAME=${KONTAINER_CONTAINER_NAME}"
+echo "KONTAINER_PORT=${KONTAINER_PORT}"
 
-$DOCKER stop ${KMC_CONTAINER_NAME} && $DOCKER rm ${KMC_CONTAINER_NAME}
-$DOCKER pull ${KMC_IMAGE} && \
+$DOCKER stop ${KONTAINER_CONTAINER_NAME} && $DOCKER rm ${KONTAINER_CONTAINER_NAME}
+$DOCKER pull ${KONTAINER_IMAGE} && \
 exec $DOCKER run -d \
-  --name ${KMC_CONTAINER_NAME} \
+  --name ${KONTAINER_CONTAINER_NAME} \
   --restart always \
-  -p ${KMC_PORT}:3443 \
+  -p ${KONTAINER_PORT}:3443 \
   -v ${DOCKER_SOCKET}:/var/run/docker.sock:ro \
   -v ${DOCKER_HOME}/volumes:/var/lib/docker/volumes:ro \
   -v kontainer_data:/app/data \
-  -e AGENT_DATA_VOLUME=kontainer_data \
+  -e KONTAINER_DATA_VOLUME=kontainer_data \
   -e DOCKER_HOME=${DOCKER_HOME} \
-  ${KMC_IMAGE}
+  ${KONTAINER_IMAGE}
