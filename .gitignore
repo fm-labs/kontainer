@@ -1,3 +1,6 @@
 .idea/
 .dev/
 build/
+*.local
+*.local.yml
+*.local.sh
