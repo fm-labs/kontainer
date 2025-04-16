@@ -14,10 +14,11 @@ name: Publish image to Docker Hub
 on:
   push:
     tags:
-      - "*"
+      - "v*"
+      - "*-release"
 
 #env:
-#  REPO_NAME: kmc
+#  REPO_NAME: kontainer
 
 jobs:
   publish:
