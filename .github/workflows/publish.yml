@@ -15,7 +15,6 @@ on:
   push:
     tags:
       - "v*"
-      - "*-release"
 
 #env:
 #  REPO_NAME: kontainer
