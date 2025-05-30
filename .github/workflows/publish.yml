@@ -60,6 +60,8 @@ jobs:
             -t $REGISTRY/$REPO_NAME:$IMAGE_TAG \
             -t $REGISTRY/$REPO_NAME:latest \
             --progress=plain \
+            --sbom=true \
+            --provenance=true \
             --platform linux/amd64,linux/arm64 \
             -f ./Dockerfile-alpine \
             --push \
