@@ -47,7 +47,7 @@ COPY ./core/docker/supervisor/app.ini /etc/supervisor.d/app.ini
 
 
 ## Production stage
-FROM python:3.13-alpine
+FROM python:3.13-alpine3.21
 LABEL maintainer="fm-labs <flowmotionlabs@gmail.com>"
 LABEL description="This is the production image for the kontainer service"
 
