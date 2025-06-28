@@ -55,7 +55,7 @@ ENV KONTAINER_HOST=0.0.0.0
 ENV KONTAINER_PORT=5000
 
 ARG DOCKER_DIR=/var/lib/docker
-ARG DOCKER_COMPOSE_VERSION=2.34.0
+ARG DOCKER_COMPOSE_VERSION=2.37.3
 
 # Install os packages
 RUN apk update && apk add --no-cache \
