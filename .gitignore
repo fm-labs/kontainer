@@ -1,5 +1,6 @@
 .idea/
 .dev/
+bak/
 build/
 *.local
 *.local.yml
