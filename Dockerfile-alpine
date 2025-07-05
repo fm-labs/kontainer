@@ -12,9 +12,9 @@ RUN yarn install --frozen-lockfile --network-timeout 600000 && yarn cache clean
 # Copy rest of files
 # See / edit .dockerignore file for excluded files
 COPY ./ui/ /app/
-RUN ls -la /app
+#COPY ./ui.env.production /app/.env.production.local
 
-RUN yarn build
+RUN yarn build --mode production
 
 
 ## Assembly stage
